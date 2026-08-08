@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منسّق الشعر العربي</title>
+<style>
+  :root{
+    --paper:#f7f1e3;
+    --ink:#201a17;
+    --accent:#8a6a3d;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Amiri","Noto Naskh Arabic","Geeza Pro","Tahoma",serif;
+    background:#e9e6df;
+    color:#222;
+  }
+  .app{
+    display:grid;
+    grid-template-columns:minmax(300px,390px) 1fr;
+    min-height:100vh;
+  }
+  .controls{
+    background:#fff;
+    border-left:1px solid #d8d3c9;
+    padding:24px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow:auto;
+  }
+  h1{font-size:24px;margin:0 0 8px}
+  .hint{font:14px/1.8 Tahoma, sans-serif;color:#666;margin-bottom:22px}
+  label{display:block;font:bold 13px Tahoma,sans-serif;margin:15px 0 7px}
+  textarea,input,select,button{
+    width:100%;
+    font:15px Tahoma,sans-serif;
+  }
+  textarea{
+    height:270px;
+    resize:vertical;
+    padding:14px;
+    line-height:1.9;
+    border:1px solid #ccc;
+    border-radius:10px;
+    direction:rtl;
+  }
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  input[type=color]{height:44px;border:1px solid #ccc;border-radius:9px;padding:4px;background:#fff}
+  input[type=range]{accent-color:#444}
+  input[type=text], input[type=number], select{
+    height:42px;border:1px solid #ccc;border-radius:9px;padding:0 10px;background:#fff;
+  }
+  button{
+    border:0;border-radius:10px;padding:13px;cursor:pointer;margin-top:12px;
+    background:#222;color:#fff;font-weight:bold;
+  }
+  .secondary{background:#eee;color:#222}
+  .preview-wrap{
+    padding:36px;
+    overflow:auto;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+  .paper{
+    width:min(210mm,100%);
+    min-height:297mm;
+    background:var(--paper);
+    color:var(--ink);
+    box-shadow:0 8px 30px rgba(0,0,0,.12);
+    padding:25mm 20mm;
+    position:relative;
+  }
+  .poem-title{
+    text-align:center;
+    font-weight:bold;
+    font-size:30px;
+    margin:0 0 26mm;
+  }
+  .poem{
+    width:100%;
+    max-width:174mm;
+    margin:auto;
+  }
+  .bayt{
+    direction:rtl;
+    display:grid;
+    grid-template-columns: 2.2em minmax(0,1fr) 38px minmax(0,1fr);
+    align-items:baseline;
+    column-gap:0;
+    margin:0 0 17px;
+    font-size:28px;
+    line-height:1.7;
+    white-space:nowrap;
+  }
+  .verse-number{
+    grid-column:1;
+    text-align:center;
+    direction:ltr;
+    font-family:inherit;
+    font-size:.62em;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    padding-left:10px;
+  }
+  .sadr{
+    grid-column:2;
+  }
+  .mid-gap{
+    grid-column:3;
+    text-align:center;
+  }
+  .separator{
+    color:var(--accent);
+    font-size:.72em;
+    opacity:.8;
+  }
+  .ajuz{
+    grid-column:4;
+  }
+  .sadr,
+  .ajuz{
+    direction:rtl;
+    width:100%;
+    display:flex;
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:baseline;
+    white-space:nowrap;
+  }
+  .word{
+    display:inline-block;
+    flex:0 0 auto;
+  }
+  .footer{
+    margin-top:18px;
+    text-align:left;
+    direction:rtl;
+    font-size:.72em;
+    opacity:.7;
+  }
+  .empty{opacity:.45;text-align:center;font:18px Tahoma,sans-serif;padding-top:50px}
+  @media(max-width:850px){
+    .app{grid-template-columns:1fr}
+    .controls{position:relative;height:auto;border-left:0;border-bottom:1px solid #ddd}
+    .preview-wrap{padding:15px}
+    .paper{padding:15mm 10mm;min-height:auto}
+    .bayt{font-size:22px;column-gap:10px}
+  }
+  @page{size:A4 portrait;margin:0}
+  @media print{
+    body{background:#fff}
+    .controls{display:none!important}
+    .app{display:block}
+    .preview-wrap{padding:0;display:block}
+    .paper{
+      width:210mm;height:297mm;min-height:297mm;
+      box-shadow:none;margin:0;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="controls">
+    <h1>منسّق الشعر العربي</h1>
+    <div class="hint">
+      اكتب كل شطر في سطر مستقل، واترك سطرًا فارغًا بين الأبيات إن شئت.
+      سيُجمع كل شطرين في بيت واحد.
+    </div>
+
+    <label for="title">عنوان القصيدة</label>
+    <input id="title" type="text" placeholder="عنوان القصيدة">
+
+    <label for="poemInput">نص القصيدة</label>
+    <textarea id="poemInput">ومن راءَ مني خصلةً لا يُحِبُّها
+فلستُ على كسبي رضاهُ بجاهدِ
+
+فإن التي باليتُ يومًا برأيِها
+تولَّتْ وما باليتُ بعدُ بناقدِ</textarea>
+
+    <div class="row">
+      <div>
+        <label for="bgColor">لون الخلفية</label>
+        <input id="bgColor" type="color" value="#f7f1e3">
+      </div>
+      <div>
+        <label for="textColor">لون الخط</label>
+        <input id="textColor" type="color" value="#201a17">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="accentColor">لون الفاصل</label>
+        <input id="accentColor" type="color" value="#8a6a3d">
+      </div>
+      <div>
+        <label for="fontSize">حجم الخط: <span id="fontSizeValue">28</span></label>
+        <input id="fontSize" type="range" min="18" max="42" value="28">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="titleFontSize">حجم خط العنوان: <span id="titleFontSizeValue">30</span></label>
+        <input id="titleFontSize" type="range" min="18" max="48" value="30">
+      </div>
+      <div>
+        <label for="poetFontSize">حجم خط اسم الشاعر: <span id="poetFontSizeValue">18</span></label>
+        <input id="poetFontSize" type="range" min="12" max="32" value="18">
+      </div>
+    </div>
+
+    <label for="fontFamily">الخط</label>
+    <select id="fontFamily">
+      <option value='"Amiri","Noto Naskh Arabic","Geeza Pro",serif'>أميري Amiri</option>
+      <option value='"Noto Naskh Arabic","Geeza Pro",serif'>Noto Naskh Arabic</option>
+      <option value='"Geeza Pro","Tahoma",sans-serif'>Geeza Pro</option>
+      <option value='"Traditional Arabic","Arabic Typesetting",serif'>Traditional Arabic</option>
+      <option value='"Arabic Typesetting","Traditional Arabic",serif'>Arabic Typesetting</option>
+      <option value='"Tahoma","Arial",sans-serif'>Tahoma</option>
+      <option value='"Arial","Tahoma",sans-serif'>Arial</option>
+      <option value='"Times New Roman",serif'>Times New Roman</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label for="numberVerses">ترقيم الأبيات</label>
+        <select id="numberVerses">
+          <option value="off">بدون ترقيم</option>
+          <option value="on">ترقيم الأبيات</option>
+        </select>
+      </div>
+      <div>
+        <label for="startNumber">رقم البداية</label>
+        <input id="startNumber" type="number" min="1" value="1">
+      </div>
+    </div>
+
+    <label for="separator">الفاصل بين الشطرين</label>
+    <select id="separator">
+      <option value="" selected>بلا فاصل — مثل الكتاب</option>
+      <option value="✦">✦</option>
+      <option value="◆">◆</option>
+      <option value="۞">۞</option>
+      <option value="•">•</option>
+    </select>
+
+    <label for="footerInput">اسم الشاعر (اختياري)</label>
+    <input id="footerInput" type="text" placeholder="اسم الشاعر">
+
+    <button id="printBtn">تصدير PDF / طباعة</button>
+    <button class="secondary" id="resetBtn">إعادة الألوان الافتراضية</button>
+
+    <div class="hint" style="margin-top:14px">
+      عند الضغط على «تصدير PDF / طباعة»، اختر من نافذة الطباعة
+      <b>Save as PDF / حفظ كملف PDF</b>، وفعّل طباعة رسومات الخلفية إن ظهرت لك هذه الخانة.
+    </div>
+  </aside>
+
+  <main class="preview-wrap">
+    <section class="paper" id="paper">
+      <h2 class="poem-title" id="titlePreview"></h2>
+      <div class="poem" id="poemPreview"></div>
+      <div class="footer" id="footerPreview"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const poemInput = document.getElementById('poemInput');
+const poemPreview = document.getElementById('poemPreview');
+const titleInput = document.getElementById('title');
+const titlePreview = document.getElementById('titlePreview');
+const footerInput = document.getElementById('footerInput');
+const footerPreview = document.getElementById('footerPreview');
+const bgColor = document.getElementById('bgColor');
+const textColor = document.getElementById('textColor');
+const accentColor = document.getElementById('accentColor');
+const fontSize = document.getElementById('fontSize');
+const fontSizeValue = document.getElementById('fontSizeValue');
+const titleFontSize = document.getElementById('titleFontSize');
+const titleFontSizeValue = document.getElementById('titleFontSizeValue');
+const poetFontSize = document.getElementById('poetFontSize');
+const poetFontSizeValue = document.getElementById('poetFontSizeValue');
+const fontFamily = document.getElementById('fontFamily');
+const separator = document.getElementById('separator');
+const numberVerses = document.getElementById('numberVerses');
+const startNumber = document.getElementById('startNumber');
+
+function esc(s){
+  return s.replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  })[c]);
+}
+
+
+function wordsHTML(s){
+  return s.trim().split(/\s+/).filter(Boolean)
+    .map(w => '<span class="word">'+esc(w)+'</span>').join('');
+}
+
+function render(){
+  // الفراغات لا تؤثر؛ كل سطرين غير فارغين = بيت.
+  const lines = poemInput.value
+    .split(/\r?\n/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  poemPreview.innerHTML = '';
+
+  if(!lines.length){
+    poemPreview.innerHTML = '<div class="empty">ستظهر القصيدة هنا</div>';
+  } else {
+    for(let i=0;i<lines.length;i+=2){
+      const right = lines[i] || '';
+      const left = lines[i+1] || '';
+      const bayt = document.createElement('div');
+      bayt.className = 'bayt';
+      bayt.style.fontSize = fontSize.value + 'px';
+      const verseNo = Math.floor(i / 2) + Number(startNumber.value || 1);
+      const showNo = numberVerses.value === 'on';
+      bayt.innerHTML =
+        '<div class="verse-number">'+(showNo ? verseNo : '')+'</div>' +
+        '<div class="sadr">'+wordsHTML(right)+'</div>' +
+        '<div class="mid-gap">'+(separator.value ? '<span class="separator">'+esc(separator.value)+'</span>' : '')+'</div>' +
+        '<div class="ajuz">'+wordsHTML(left)+'</div>';
+      poemPreview.appendChild(bayt);
+    }
+  }
+
+  titlePreview.textContent = titleInput.value.trim();
+  titlePreview.style.display = titleInput.value.trim() ? 'block' : 'none';
+  titlePreview.style.fontSize = titleFontSize.value + 'px';
+
+  footerPreview.textContent = footerInput.value.trim();
+  footerPreview.style.fontSize = poetFontSize.value + 'px';
+
+  document.getElementById('paper').style.fontFamily = fontFamily.value;
+
+  document.documentElement.style.setProperty('--paper', bgColor.value);
+  document.documentElement.style.setProperty('--ink', textColor.value);
+  document.documentElement.style.setProperty('--accent', accentColor.value);
+  fontSizeValue.textContent = fontSize.value;
+  titleFontSizeValue.textContent = titleFontSize.value;
+  poetFontSizeValue.textContent = poetFontSize.value;
+}
+
+[
+  poemInput,titleInput,footerInput,bgColor,textColor,
+  accentColor,fontSize,titleFontSize,poetFontSize,fontFamily,separator,
+  numberVerses,startNumber
+].forEach(el => el.addEventListener('input',render));
+
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  bgColor.value = '#f7f1e3';
+  textColor.value = '#201a17';
+  accentColor.value = '#8a6a3d';
+  fontSize.value = '28';
+  titleFontSize.value = '30';
+  poetFontSize.value = '18';
+  fontFamily.selectedIndex = 0;
+  separator.value = '';
+  numberVerses.value = 'off';
+  startNumber.value = '1';
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
